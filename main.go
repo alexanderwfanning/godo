@@ -12,7 +12,7 @@ type Tile struct {
 	todo  []string
 }
 
-func printTile(t Tile) {
+func (t Tile) print() {
 	fmt.Println("\n", t.title)
 	for i, v := range t.todo {
 		fmt.Printf("%d. %s\n", i+1, v)
@@ -51,5 +51,5 @@ func main() {
 
 	//Create and print new tile
 	newTile := tileConstructor(newTitle, separatedTasks...)
-	printTile(newTile)
+	newTile.print()
 }
