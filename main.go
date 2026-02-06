@@ -14,11 +14,17 @@ func printTile(t Tile) {
 	}
 }
 
+func tileConstructor(tileTitle string, tasks ...string) Tile {
+	newTile := Tile{title: tileTitle}
+	for _, task := range tasks {
+		newTile.todo = append(newTile.todo, task)
+	}
+	return newTile
+}
+
 func main() {
-	myTile := Tile{title: "First Things First", todo: []string{"test", "another task", "yet another task", "and another and another"}}
-	anotherTile := Tile{title: "Secondary Things Second", todo: []string{"Make this work", "And make it good"}}
-	tertiaryTile := Tile{title: "Tertiary Things Third", todo: []string{"Bubble Tea looks cool!", "Maybe I should use that?"}}
-	allMyTiles := []Tile{myTile, anotherTile, tertiaryTile}
+	myTile := tileConstructor("First Things First", "test", "another task", "yet another task", "and another and another")
+	allMyTiles := []Tile{myTile}
 	for _, tile := range allMyTiles {
 		printTile(tile)
 	}
