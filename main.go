@@ -16,10 +16,14 @@ func printTile(t Tile) {
 
 func tileConstructor(tileTitle string, tasks ...string) Tile {
 	newTile := Tile{title: tileTitle}
-	for _, task := range tasks {
-		newTile.todo = append(newTile.todo, task)
-	}
+	newTile.addTask(tasks)
 	return newTile
+}
+
+func (t *Tile) addTask(tasks []string) {
+	for _, task := range tasks {
+		t.todo = append(t.todo, task)
+	}
 }
 
 func main() {
