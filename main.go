@@ -3,12 +3,19 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"strings"
+
+	"github.com/tidwall/buntdb"
 )
 
-
 func main() {
+	db, err := buntdb.Open("data.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
 	var separatedTasks []string
 	// Get title
 	reader := bufio.NewReader(os.Stdin)
