@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -16,6 +17,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
+
 	var separatedTasks []string
 	// Get title
 	reader := bufio.NewReader(os.Stdin)
@@ -36,4 +38,25 @@ func main() {
 	//Create and print new tile
 	newTile := tileConstructor(newTitle, separatedTasks...)
 	newTile.print()
+	saveToDB(db, newTile)
+}
+
+func saveToDB(db *buntdb.DB, t Tile) error {
+	// Convert ID to str to store as key in DB
+	key := fmt.Sprintf("%d", t.Uid)
+
+	// Convert tasks to JSON
+	// []todo -> []bytes -> json string
+	todoBytes, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+	value := string(todoBytes)
+	fmt.Println(value)
+	// Write to DB
+	db.Update(func(tx *buntdb.Tx) error {
+		_, _, err := tx.Set(key, value, nil)
+		return err
+	})
+	return err
 }
