@@ -11,6 +11,10 @@ import (
 	"github.com/tidwall/buntdb"
 )
 
+func addTile() int {
+	return 0
+}
+
 func main() {
 	db, err := buntdb.Open("data.db")
 	if err != nil {
@@ -37,26 +41,55 @@ func main() {
 
 	//Create and print new tile
 	newTile := tileConstructor(newTitle, separatedTasks...)
-	newTile.print()
-	saveToDB(db, newTile)
+	pushDB(db, newTile)
+	tile, luerr := pullDB(db, "0")
+	if luerr != nil {
+		fmt.Println("Look up error! Tile ID {ID} not found") // Placeholder
+	}
+	tile.print()
 }
 
-func saveToDB(db *buntdb.DB, t Tile) error {
+func pushDB(db *buntdb.DB, t Tile) error {
 	// Convert ID to str to store as key in DB
 	key := fmt.Sprintf("%d", t.Uid)
 
-	// Convert tasks to JSON
-	// []todo -> []bytes -> json string
-	todoBytes, err := json.Marshal(t)
+	// Convert Tile to JSON
+	// Tile -> []bytes -> JSON
+	tileBytes, err := json.Marshal(t)
 	if err != nil {
 		return err
 	}
-	value := string(todoBytes)
-	fmt.Println(value)
+	value := string(tileBytes)
+
 	// Write to DB
-	db.Update(func(tx *buntdb.Tx) error {
-		_, _, err := tx.Set(key, value, nil)
+	err = db.Update(func(tx *buntdb.Tx) error {
+		_, _, err = tx.Set(key, value, nil)
 		return err
 	})
 	return err
+}
+
+func pullDB(db *buntdb.DB, key string) (Tile, error) {
+	// Initialize Tile
+	tile := Tile{}
+
+	// Read from DB
+	err := db.View(func(tx *buntdb.Tx) error {
+		// Tile is stored as JSON
+		tileJSON, err := tx.Get(key)
+		if err != nil {
+			return err
+		}
+
+		// Tile is converted from JSON to Bytes
+		tileBytes := []byte(tileJSON)
+
+		// Tile is converted from Bytes to Tile
+		err = json.Unmarshal(tileBytes, &tile)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	return tile, err
 }
