@@ -11,17 +11,7 @@ import (
 	"github.com/tidwall/buntdb"
 )
 
-func addTile() int {
-	return 0
-}
-
-func main() {
-	db, err := buntdb.Open("data.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
+func addTile(db *buntdb.DB) {
 	var separatedTasks []string
 	// Get title
 	reader := bufio.NewReader(os.Stdin)
@@ -42,6 +32,16 @@ func main() {
 	//Create and print new tile
 	newTile := tileConstructor(newTitle, separatedTasks...)
 	pushDB(db, newTile)
+}
+
+func main() {
+	db, err := buntdb.Open("data.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+	addTile(db)
+
 	tile, luerr := pullDB(db, "0")
 	if luerr != nil {
 		fmt.Println("Look up error! Tile ID {ID} not found") // Placeholder
@@ -51,7 +51,7 @@ func main() {
 
 func pushDB(db *buntdb.DB, t Tile) error {
 	// Convert ID to str to store as key in DB
-	key := fmt.Sprintf("%d", t.Uid)
+	tileUID := fmt.Sprintf("%d", t.Uid)
 
 	// Convert Tile to JSON
 	// Tile -> []bytes -> JSON
@@ -59,11 +59,11 @@ func pushDB(db *buntdb.DB, t Tile) error {
 	if err != nil {
 		return err
 	}
-	value := string(tileBytes)
+	tileJSON := string(tileBytes)
 
 	// Write to DB
 	err = db.Update(func(tx *buntdb.Tx) error {
-		_, _, err = tx.Set(key, value, nil)
+		_, _, err = tx.Set(tileUID, tileJSON, nil)
 		return err
 	})
 	return err
